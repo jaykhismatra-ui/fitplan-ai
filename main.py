@@ -16,6 +16,26 @@ from services.diet_service import generate_diet_plan
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "fitplan-ai-secret-2024")
 
+# ── CREATE TABLES ON STARTUP (works on Render + locally) ──────────────────
+create_tables()
+
+# ── CREATE DEFAULT ADMIN ON STARTUP ───────────────────────────────────────
+def create_default_admin():
+    try:
+        db = get_db()
+        admin = db.execute("SELECT id FROM users WHERE username='admin'").fetchone()
+        if not admin:
+            db.execute(
+                "INSERT INTO users (username, email, hashed_password, is_admin) VALUES (?,?,?,1)",
+                ("admin", "admin@fitplan.com", hash_password("admin123"))
+            )
+            db.commit()
+        db.close()
+    except Exception as e:
+        print("Admin creation error:", e)
+
+create_default_admin()
+
 # ── SECURITY: Secret Admin URL ─────────────────────────────────────────────
 # Change ADMIN_SECRET in .env file to your own secret path
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "jay-admin-9321")
