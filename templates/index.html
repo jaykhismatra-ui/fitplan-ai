@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}FitPlan AI - Personalized Workout & Diet Planner{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">🤖 AI-Powered Planning</div>
+        <h1 class="hero-title">Your Personal Fitness<br><span class="gradient-text">Coach & Nutritionist</span></h1>
+        <p class="hero-subtitle">
+            Get a fully personalized workout routine and diet plan based on your body, goals, cultural food habits, and budget.
+            No generic plans — just intelligent recommendations built for <strong>you</strong>.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Start Free →</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Already have an account</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="stat-cards">
+            <div class="stat-card"><div class="stat-icon">🏋️</div><div class="stat-value">7-Day</div><div class="stat-label">Workout Plans</div></div>
+            <div class="stat-card"><div class="stat-icon">🥗</div><div class="stat-value">Daily</div><div class="stat-label">Meal Plans</div></div>
+            <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">BMI</div><div class="stat-label">Auto-Calculated</div></div>
+            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">Budget</div><div class="stat-label">Friendly</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <h2 class="section-title">Everything You Need</h2>
+    <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">🧬</div><h3>Smart Personalization</h3><p>Plans adapt to your BMI, age, gender, fitness goals, and available equipment — gym, home, or no equipment.</p></div>
+        <div class="feature-card"><div class="feature-icon">🍛</div><h3>Cultural Food Habits</h3><p>Indian or Western food preferences? We generate culturally appropriate meal plans you'll actually enjoy.</p></div>
+        <div class="feature-card"><div class="feature-icon">💸</div><h3>Budget-Aware</h3><p>Whether you're on a tight student budget or can spend more — the diet plan adjusts to your spending level.</p></div>
+        <div class="feature-card"><div class="feature-icon">📈</div><h3>BMR & Calorie Tracking</h3><p>Auto-calculates your Basal Metabolic Rate and daily calorie needs using the Mifflin-St Jeor formula.</p></div>
+        <div class="feature-card"><div class="feature-icon">🔄</div><h3>Regenerate Anytime</h3><p>Not happy with your plan? Regenerate with a single click. Previous plans are saved for reference.</p></div>
+        <div class="feature-card"><div class="feature-icon">📱</div><h3>Mobile Friendly</h3><p>Access your plans on any device. Clean, responsive design built for students on the go.</p></div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2 class="section-title">How It Works</h2>
+    <div class="steps">
+        <div class="step"><div class="step-num">1</div><h3>Create Account</h3><p>Register with your email and username in seconds.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-num">2</div><h3>Fill Your Profile</h3><p>Enter your age, weight, height, goals, and preferences.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-num">3</div><h3>Generate Plans</h3><p>AI generates your personalized workout & diet plan instantly.</p></div>
+        <div class="step-arrow">→</div>
+        <div class="step"><div class="step-num">4</div><h3>Start Today</h3><p>Follow your plan and track your journey to fitness.</p></div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Ready to Transform Your Fitness?</h2>
+    <p>Join thousands of students getting personalized fitness guidance.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Your Free Plan →</a>
+</section>
+{% endblock %}

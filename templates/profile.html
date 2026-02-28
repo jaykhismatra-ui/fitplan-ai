@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}My Profile - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📋 Your Profile</h1>
+    <p>Fill in your details to get a personalized plan</p>
+</div>
+
+<div class="profile-container">
+    {% if errors %}<div class="alert alert-error">{{ errors | join(' ') }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('profile_page') }}" class="profile-form" enctype="multipart/form-data">
+
+        <!-- Profile Photo -->
+        <div class="form-section">
+            <h2 class="section-label">📸 Profile Photo</h2>
+            <div style="display:flex; align-items:center; gap:20px;">
+                {% if user and user.profile_photo %}
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}"
+                     class="photo-preview" alt="Profile Photo">
+                {% else %}
+                <div class="photo-placeholder">👤</div>
+                {% endif %}
+                <div>
+                    <input type="file" name="photo" accept="image/*" class="form-input" style="padding:8px;">
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:6px;">JPG, PNG or GIF. Max 2MB.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Physical Stats -->
+        <div class="form-section">
+            <h2 class="section-label">🧬 Physical Stats</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Age (years)</label>
+                    <input type="number" name="age" min="10" max="100"
+                           value="{{ profile.age if profile else '' }}" required class="form-input" placeholder="e.g. 21">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" class="form-input" required>
+                        <option value="">Select gender</option>
+                        <option value="male" {% if profile and profile.gender=='male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if profile and profile.gender=='female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Height (cm)</label>
+                    <input type="number" name="height_cm" min="100" max="250" step="0.1"
+                           value="{{ profile.height_cm if profile else '' }}" required class="form-input" placeholder="e.g. 170">
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" name="weight_kg" min="30" max="300" step="0.1"
+                           value="{{ profile.weight_kg if profile else '' }}" required class="form-input" placeholder="e.g. 70">
+                </div>
+            </div>
+            {% if profile and profile.bmi %}
+            <div class="bmi-display">
+                <span class="bmi-value">BMI: <strong>{{ profile.bmi }}</strong></span>
+                <span class="bmi-badge bmi-{{ profile.bmi_category.lower() }}">{{ profile.bmi_category }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Fitness Goal -->
+        <div class="form-section">
+            <h2 class="section-label">🎯 Fitness Goal</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="fitness_goal" value="weight_loss" {% if profile and profile.fitness_goal=='weight_loss' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🔥</span><span class="radio-title">Weight Loss</span><span class="radio-desc">Burn fat, lean down</span></div></label>
+                <label class="radio-card"><input type="radio" name="fitness_goal" value="muscle_gain" {% if profile and profile.fitness_goal=='muscle_gain' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">💪</span><span class="radio-title">Muscle Gain</span><span class="radio-desc">Build strength & size</span></div></label>
+                <label class="radio-card"><input type="radio" name="fitness_goal" value="maintenance" {% if profile and profile.fitness_goal=='maintenance' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">⚖️</span><span class="radio-title">Maintenance</span><span class="radio-desc">Stay fit & healthy</span></div></label>
+            </div>
+        </div>
+
+        <!-- Dietary Preference -->
+        <div class="form-section">
+            <h2 class="section-label">🍽️ Dietary Preference</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="dietary_preference" value="vegetarian" {% if profile and profile.dietary_preference=='vegetarian' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🥦</span><span class="radio-title">Vegetarian</span></div></label>
+                <label class="radio-card"><input type="radio" name="dietary_preference" value="vegan" {% if profile and profile.dietary_preference=='vegan' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🌱</span><span class="radio-title">Vegan</span></div></label>
+                <label class="radio-card"><input type="radio" name="dietary_preference" value="non_veg" {% if profile and profile.dietary_preference=='non_veg' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🍗</span><span class="radio-title">Non-Vegetarian</span></div></label>
+            </div>
+        </div>
+
+        <!-- Cultural Preference -->
+        <div class="form-section">
+            <h2 class="section-label">🌍 Cultural Food Preference</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="cultural_preference" value="indian" {% if profile and profile.cultural_preference=='indian' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🇮🇳</span><span class="radio-title">Indian</span><span class="radio-desc">Dal, Rice, Roti...</span></div></label>
+                <label class="radio-card"><input type="radio" name="cultural_preference" value="western" {% if profile and profile.cultural_preference=='western' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🌍</span><span class="radio-title">Western</span><span class="radio-desc">Salads, Wraps, Pasta...</span></div></label>
+                <label class="radio-card"><input type="radio" name="cultural_preference" value="mixed" {% if profile and profile.cultural_preference=='mixed' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🔀</span><span class="radio-title">Mixed</span><span class="radio-desc">Both cultures</span></div></label>
+            </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="form-section">
+            <h2 class="section-label">💰 Budget Level</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="budget_level" value="low" {% if profile and profile.budget_level=='low' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">💵</span><span class="radio-title">Low</span><span class="radio-desc">Under ₹200/day</span></div></label>
+                <label class="radio-card"><input type="radio" name="budget_level" value="medium" {% if profile and profile.budget_level=='medium' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">💳</span><span class="radio-title">Medium</span><span class="radio-desc">₹200–₹500/day</span></div></label>
+                <label class="radio-card"><input type="radio" name="budget_level" value="high" {% if profile and profile.budget_level=='high' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">💎</span><span class="radio-title">High</span><span class="radio-desc">₹500+/day</span></div></label>
+            </div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="form-section">
+            <h2 class="section-label">🏋️ Available Equipment</h2>
+            <div class="radio-group">
+                <label class="radio-card"><input type="radio" name="equipment" value="gym" {% if profile and profile.equipment=='gym' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🏋️</span><span class="radio-title">Gym</span><span class="radio-desc">Full gym access</span></div></label>
+                <label class="radio-card"><input type="radio" name="equipment" value="home" {% if profile and profile.equipment=='home' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🏠</span><span class="radio-title">Home</span><span class="radio-desc">Bands, dumbbells</span></div></label>
+                <label class="radio-card"><input type="radio" name="equipment" value="none" {% if profile and profile.equipment=='none' %}checked{% endif %}>
+                    <div class="radio-content"><span class="radio-icon">🤸</span><span class="radio-title">No Equipment</span><span class="radio-desc">Bodyweight only</span></div></label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-full">Save Profile & Go to Dashboard →</button>
+    </form>
+</div>
+{% endblock %}

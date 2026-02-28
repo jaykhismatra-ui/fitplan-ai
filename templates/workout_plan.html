@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}My Workout Plan - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🏋️ Your 7-Day Workout Plan</h1>
+    {% if created_at %}<p>Generated on {{ created_at }}</p>{% endif %}
+</div>
+
+{% if not plan %}
+<div class="empty-state">
+    <div class="empty-icon">🏋️</div>
+    <h2>No Workout Plan Yet</h2>
+    <p>Go to your dashboard and generate a personalized workout plan.</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard →</a>
+</div>
+{% else %}
+<div class="plan-header-bar">
+    <div class="plan-badges"><span class="badge-large">Intensity: {{ plan.intensity }}</span></div>
+    <form method="POST" action="{{ url_for('generate_workout') }}">
+        <button type="submit" class="btn btn-primary">🔄 Regenerate Plan</button>
+    </form>
+</div>
+
+{% if plan.notes %}
+<div class="advice-box"><strong>💡 AI Advice:</strong> {{ plan.notes }}</div>
+{% endif %}
+
+<div class="weekly-plan-full">
+    {% for day in plan.weekly_plan %}
+    <div class="day-full-card">
+        <div class="day-full-header">
+            <div>
+                <h2>{{ day.day }}</h2>
+                <span class="day-focus-tag">{{ day.focus }}</span>
+            </div>
+            <div class="day-duration-large">⏱ {{ day.total_duration_minutes }} min</div>
+        </div>
+        <div class="exercise-table">
+            <div class="exercise-row header-row">
+                <span>Exercise</span><span>Muscle</span><span>Sets</span><span>Reps</span><span>Rest</span>
+            </div>
+            {% for ex in day.exercises %}
+            <div class="exercise-row">
+                <span class="ex-name-full">{{ ex.name }}</span>
+                <span class="ex-muscle">{{ ex.muscle }}</span>
+                <span class="ex-sets">{{ ex.sets }}</span>
+                <span class="ex-reps">{{ ex.reps }}</span>
+                <span class="ex-rest">
+                    {% if ex.rest_sec == 0 %}—
+                    {% elif ex.rest_sec < 60 %}{{ ex.rest_sec }}s
+                    {% else %}{{ (ex.rest_sec / 60)|int }}m {{ ex.rest_sec % 60 }}s{% endif %}
+                </span>
+            </div>
+            {% if ex.note is defined and ex.note %}
+            <div class="ex-note-row">💡 {{ ex.note }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

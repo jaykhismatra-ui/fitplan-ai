@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Access Denied - FitPlan AI{% endblock %}
+{% block content %}
+<div class="error-page">
+    <div class="error-icon">🔒</div>
+    <div class="error-code">403</div>
+    <h1>Access Denied</h1>
+    <p>You don't have permission to view this page.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">Go Home</a>
+</div>
+{% endblock %}

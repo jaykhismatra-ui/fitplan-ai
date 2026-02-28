@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>&#x1F6E1; Admin Dashboard</h1>
+    <p>Manage all users and view platform statistics</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-box" style="border-left:4px solid #6C63FF">
+        <div class="stat-icon-lg">&#x1F465;</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #2ED573">
+        <div class="stat-icon-lg">&#x2705;</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.active_users }}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #FF6584">
+        <div class="stat-icon-lg">&#x1F3CB;</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.total_workouts }}</div>
+            <div class="stat-label">Workout Plans</div>
+        </div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #FFA502">
+        <div class="stat-icon-lg">&#x1F957;</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.total_diets }}</div>
+            <div class="stat-label">Diet Plans</div>
+        </div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #1E90FF">
+        <div class="stat-icon-lg">&#x1F4C8;</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ stats.total_logs }}</div>
+            <div class="stat-label">Progress Logs</div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>&#x1F465; All Users</h2>
+        <span class="meta-badge">{{ users | length }} total</span>
+    </div>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Username</th><th>Email</th>
+                    <th>BMI</th><th>Goal</th><th>Plans</th>
+                    <th>Status</th><th>Joined</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="{% if not user.is_active %}row-inactive{% endif %}">
+                    <td>#{{ user.id }}</td>
+                    <td>
+                        <strong>{{ user.username }}</strong>
+                        {% if user.is_admin %}
+                        <span class="admin-badge">ADMIN</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.bmi %}
+                        <span class="bmi-badge bmi-{{ user.bmi_category.lower() if user.bmi_category else 'normal' }}">
+                            {{ user.bmi }}
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ user.fitness_goal.replace('_',' ').title() if user.fitness_goal else '—' }}</td>
+                    <td>
+                        <span style="color:#6C63FF">&#x1F4AA;{{ user.workout_count }}</span>
+                        <span style="color:#2ED573;margin-left:8px">&#x1F957;{{ user.diet_count }}</span>
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                        <span class="status-badge active">Active</span>
+                        {% else %}
+                        <span class="status-badge inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.created_at[:10] if user.created_at else '—' }}</td>
+                    <td class="action-btns">
+                        {% if not user.is_admin %}
+                        <form method="POST"
+                              action="/{{ admin_secret }}/toggle-user/{{ user.id }}"
+                              style="display:inline">
+                            <button type="submit"
+                                    class="btn-action {% if user.is_active %}btn-warn{% else %}btn-success{% endif %}">
+                                {{ 'Deactivate' if user.is_active else 'Activate' }}
+                            </button>
+                        </form>
+                        <form method="POST"
+                              action="/{{ admin_secret }}/make-admin/{{ user.id }}"
+                              style="display:inline"
+                              onsubmit="return confirm('Make {{ user.username }} an admin?')">
+                            <button type="submit" class="btn-action btn-info">Make Admin</button>
+                        </form>
+                        <form method="POST"
+                              action="/{{ admin_secret }}/delete-user/{{ user.id }}"
+                              style="display:inline"
+                              onsubmit="return confirm('DELETE {{ user.username }}? Cannot be undone!')">
+                            <button type="submit" class="btn-action btn-danger">Delete</button>
+                        </form>
+                        {% else %}
+                        <span style="color:var(--text-muted);font-size:0.8rem">Protected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

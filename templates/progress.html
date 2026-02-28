@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Progress Tracker - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📈 Progress Tracker</h1>
+    <p>Log your daily weight and water intake — watch your journey unfold</p>
+</div>
+
+<!-- Log Form -->
+<div class="dashboard-section">
+    <h2 class="section-header-title">📝 Log Today's Progress</h2>
+    <form method="POST" action="{{ url_for('progress') }}" class="log-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" name="log_date" value="{{ today }}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" name="weight_kg" step="0.1" min="20" max="300"
+                       placeholder="e.g. 70.5" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Water Intake (ml)</label>
+                <input type="number" name="water_ml" min="0" max="10000"
+                       placeholder="e.g. 2500" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                <input type="text" name="notes" placeholder="How did you feel today?"
+                       class="form-input">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Save Log ✓</button>
+    </form>
+</div>
+
+<!-- Charts -->
+{% if logs %}
+<div class="dashboard-section">
+    <h2 class="section-header-title">📊 Progress Charts</h2>
+    <div class="charts-grid">
+        <div class="chart-box">
+            <h3>⚖️ Weight Over Time</h3>
+            <canvas id="weightChart" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3>💧 Water Intake (ml)</h3>
+            <canvas id="waterChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Log History -->
+<div class="dashboard-section">
+    <h2 class="section-header-title">📋 Recent Logs</h2>
+    <div class="log-table">
+        <div class="log-row log-header">
+            <span>Date</span><span>Weight</span><span>Water</span><span>Notes</span>
+        </div>
+        {% for log in logs %}
+        <div class="log-row">
+            <span>{{ log.log_date }}</span>
+            <span>{{ log.weight_kg if log.weight_kg else '—' }} kg</span>
+            <span>{{ log.water_ml or 0 }} ml</span>
+            <span class="log-notes">{{ log.notes or '—' }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h2>No Logs Yet</h2>
+    <p>Start logging today to see your progress charts!</p>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = {{ chart_labels | safe }};
+const weights = {{ chart_weights | safe }};
+const water = {{ chart_water | safe }};
+
+if (labels.length > 0) {
+    new Chart(document.getElementById('weightChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Weight (kg)',
+                data: weights,
+                borderColor: '#6C63FF',
+                backgroundColor: 'rgba(108,99,255,0.1)',
+                tension: 0.4, fill: true,
+                pointBackgroundColor: '#6C63FF', pointRadius: 5
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } },
+                   scales: { y: { beginAtZero: false } } }
+    });
+
+    new Chart(document.getElementById('waterChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Water (ml)',
+                data: water,
+                backgroundColor: 'rgba(33,150,243,0.7)',
+                borderColor: '#2196F3', borderWidth: 2, borderRadius: 6
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } },
+                   scales: { y: { beginAtZero: true } } }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Login - FitPlan AI{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">&#x1F510;</div>
+            <h1>Welcome Back</h1>
+            <p>Sign in to view your fitness plans</p>
+        </div>
+
+        {% if error %}
+        <div class="alert {% if locked %}alert-locked{% else %}alert-error{% endif %}">
+            {% if locked %}&#x1F512;{% else %}&#x26A0;{% endif %} {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username"
+                       placeholder="Your username" required class="form-input"
+                       {% if locked %}disabled{% endif %}>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password"
+                       placeholder="Your password" required class="form-input"
+                       {% if locked %}disabled{% endif %}>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full"
+                    {% if locked %}disabled style="opacity:0.5;cursor:not-allowed"{% endif %}>
+                {% if locked %}&#x1F512; Account Locked{% else %}Sign In &#x2192;{% endif %}
+            </button>
+        </form>
+
+        <div class="security-info">
+            <span>&#x1F6E1;</span>
+            <span>Protected by rate limiting — max {{ 5 }} attempts before lockout</span>
+        </div>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="{{ url_for('register') }}">Register</a>
+        </div>
+        <div class="test-hint">
+            <strong>&#x1F9EA; Test Account:</strong>
+            username: <code>testuser</code> / password: <code>test123</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

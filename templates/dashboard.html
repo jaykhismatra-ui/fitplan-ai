@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>👋 Hello, {{ user.username }}!</h1>
+    <p>Here's your personalized fitness dashboard</p>
+</div>
+
+{% if not profile %}
+<div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h2>Complete Your Profile First</h2>
+    <p>We need a few details to generate your personalized plans.</p>
+    <a href="{{ url_for('profile_page') }}" class="btn btn-primary">Set Up Profile →</a>
+</div>
+
+{% else %}
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-icon-lg">⚖️</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ profile.bmi }}</div>
+            <div class="stat-label">BMI</div>
+            <div class="bmi-badge bmi-{{ profile.bmi_category.lower() }}">{{ profile.bmi_category }}</div>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon-lg">🔥</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ profile.daily_calories | int }}</div>
+            <div class="stat-label">Daily Calories</div>
+            <div class="stat-sub">recommended</div>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon-lg">💓</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ profile.bmr | int }}</div>
+            <div class="stat-label">BMR</div>
+            <div class="stat-sub">kcal/day base</div>
+        </div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon-lg">🎯</div>
+        <div class="stat-info">
+            <div class="stat-number">{{ profile.fitness_goal.replace('_', ' ').title() }}</div>
+            <div class="stat-label">Your Goal</div>
+            <div class="stat-sub">{{ profile.equipment }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>📊 Your Profile</h2>
+        <a href="{{ url_for('profile_page') }}" class="btn btn-outline btn-sm">Edit</a>
+    </div>
+    <div class="profile-summary">
+        <div class="summary-item"><span>Age</span><strong>{{ profile.age }} yrs</strong></div>
+        <div class="summary-item"><span>Gender</span><strong>{{ profile.gender.title() }}</strong></div>
+        <div class="summary-item"><span>Height</span><strong>{{ profile.height_cm }} cm</strong></div>
+        <div class="summary-item"><span>Weight</span><strong>{{ profile.weight_kg }} kg</strong></div>
+        <div class="summary-item"><span>Diet</span><strong>{{ profile.dietary_preference.replace('_', '-').title() }}</strong></div>
+        <div class="summary-item"><span>Culture</span><strong>{{ profile.cultural_preference.title() }}</strong></div>
+        <div class="summary-item"><span>Budget</span><strong>{{ profile.budget_level.title() }}</strong></div>
+        <div class="summary-item"><span>Equipment</span><strong>{{ profile.equipment.title() }}</strong></div>
+    </div>
+</div>
+
+<div class="dashboard-section" id="workout">
+    <div class="section-header">
+        <h2>🏋️ Workout Plan</h2>
+        <form method="POST" action="{{ url_for('generate_workout') }}" style="display:inline">
+            <button type="submit" class="btn btn-primary btn-sm">
+                {% if workout_plan %}🔄 Regenerate{% else %}✨ Generate Plan{% endif %}
+            </button>
+        </form>
+    </div>
+    {% if workout_plan %}
+    <div class="plan-preview">
+        <div class="plan-meta">
+            <span class="meta-badge">Intensity: {{ workout_plan.intensity }}</span>
+        </div>
+        <div class="weekly-grid">
+            {% for day in workout_plan.weekly_plan[:4] %}
+            <div class="day-card">
+                <div class="day-header">
+                    <strong>{{ day.day }}</strong>
+                    <span class="day-focus">{{ day.focus }}</span>
+                </div>
+                <div class="exercise-list">
+                    {% for ex in day.exercises[:3] %}
+                    <div class="exercise-item">
+                        <span class="ex-name">{{ ex.name }}</span>
+                        <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if day.exercises|length > 3 %}
+                    <div class="more-link">+{{ day.exercises|length - 3 }} more</div>
+                    {% endif %}
+                </div>
+                <div class="day-duration">⏱ {{ day.total_duration_minutes }} min</div>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('workout_plan_page') }}" class="btn btn-outline btn-sm mt-2">View Full 7-Day Plan →</a>
+        {% if workout_plan.notes %}
+        <div class="plan-notes">💡 {{ workout_plan.notes }}</div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="plan-placeholder"><p>No workout plan generated yet. Click "Generate Plan" to create your personalized routine!</p></div>
+    {% endif %}
+</div>
+
+<div class="dashboard-section" id="diet">
+    <div class="section-header">
+        <h2>🥗 Diet Plan</h2>
+        <form method="POST" action="{{ url_for('generate_diet') }}" style="display:inline">
+            <button type="submit" class="btn btn-primary btn-sm">
+                {% if diet_plan %}🔄 Regenerate{% else %}✨ Generate Plan{% endif %}
+            </button>
+        </form>
+    </div>
+    {% if diet_plan %}
+    <div class="plan-preview">
+        <div class="plan-meta">
+            <span class="meta-badge">🎯 Target: {{ diet_plan.target_calories }} kcal</span>
+            <span class="meta-badge">🍽️ Actual: {{ diet_plan.total_calories }} kcal</span>
+            <span class="meta-badge">🥩 Protein: {{ diet_plan.total_protein_g }}g</span>
+        </div>
+        <div class="meals-grid">
+            {% for meal_name, items in [('Breakfast', diet_plan.breakfast), ('Lunch', diet_plan.lunch), ('Dinner', diet_plan.dinner), ('Snacks', diet_plan.snacks)] %}
+            {% if items %}
+            <div class="meal-card">
+                <div class="meal-header">
+                    <strong>{{ meal_name }}</strong>
+                    <span>{% set ns = namespace(total=0) %}{% for i in items %}{% set ns.total = ns.total + i.cal %}{% endfor %}{{ ns.total }} kcal</span>
+                </div>
+                {% for item in items %}
+                <div class="meal-item">
+                    <span>{{ item.name }}</span>
+                    <span class="meal-qty">{{ item.qty }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('diet_plan_page') }}" class="btn btn-outline btn-sm mt-2">View Full Diet Plan →</a>
+        {% if diet_plan.notes %}
+        <div class="plan-notes">💡 {{ diet_plan.notes }}</div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="plan-placeholder"><p>No diet plan generated yet. Click "Generate Plan" to create your personalized meal plan!</p></div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

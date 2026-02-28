@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}My Diet Plan - FitPlan AI{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>🥗 Your Daily Diet Plan</h1>
+    {% if created_at %}<p>Generated on {{ created_at }}</p>{% endif %}
+</div>
+
+{% if not plan %}
+<div class="empty-state">
+    <div class="empty-icon">🥗</div>
+    <h2>No Diet Plan Yet</h2>
+    <p>Go to your dashboard and generate a personalized diet plan.</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard →</a>
+</div>
+{% else %}
+<div class="plan-header-bar">
+    <div class="macro-badges">
+        <div class="macro-badge"><span class="macro-icon">🎯</span><div><div class="macro-val">{{ plan.target_calories }}</div><div class="macro-lbl">Target kcal</div></div></div>
+        <div class="macro-badge"><span class="macro-icon">🔥</span><div><div class="macro-val">{{ plan.total_calories }}</div><div class="macro-lbl">Actual kcal</div></div></div>
+        <div class="macro-badge"><span class="macro-icon">🥩</span><div><div class="macro-val">{{ plan.total_protein_g }}g</div><div class="macro-lbl">Protein</div></div></div>
+        <div class="macro-badge"><span class="macro-icon">🍞</span><div><div class="macro-val">{{ plan.total_carbs_g }}g</div><div class="macro-lbl">Carbs</div></div></div>
+        <div class="macro-badge"><span class="macro-icon">🫒</span><div><div class="macro-val">{{ plan.total_fat_g }}g</div><div class="macro-lbl">Fat</div></div></div>
+    </div>
+    <form method="POST" action="{{ url_for('generate_diet') }}">
+        <button type="submit" class="btn btn-primary">🔄 Regenerate Plan</button>
+    </form>
+</div>
+
+{% if plan.notes %}
+<div class="advice-box"><strong>💡 Nutrition Advice:</strong> {{ plan.notes }}</div>
+{% endif %}
+
+<div class="meals-full-grid">
+    {% for meal_label, items, card_class in [('🌅 Breakfast', plan.breakfast, 'breakfast-card'), ('☀️ Lunch', plan.lunch, 'lunch-card'), ('🌙 Dinner', plan.dinner, 'dinner-card'), ('🍎 Snacks', plan.snacks, 'snack-card')] %}
+    {% if items %}
+    <div class="meal-full-card {{ card_class }}">
+        <div class="meal-full-header">
+            <h2>{{ meal_label }}</h2>
+            <span class="meal-total-cal">{% set ns = namespace(total=0) %}{% for i in items %}{% set ns.total = ns.total + i.cal %}{% endfor %}{{ ns.total }} kcal</span>
+        </div>
+        <div class="food-items">
+            {% for item in items %}
+            <div class="food-item">
+                <div class="food-main">
+                    <strong>{{ item.name }}</strong>
+                    <span class="food-qty">{{ item.qty }}</span>
+                </div>
+                <div class="food-macros">
+                    <span class="macro-pill cal">🔥 {{ item.cal }} kcal</span>
+                    <span class="macro-pill protein">🥩 {{ item.protein_g }}g protein</span>
+                    <span class="macro-pill carbs">🍞 {{ item.carbs_g }}g carbs</span>
+                    <span class="macro-pill fat">🫒 {{ item.fat_g }}g fat</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% if plan.total_calories > 0 %}
+<div class="calorie-breakdown">
+    <h3>📊 Calorie Distribution</h3>
+    <div class="bar-container">
+        <div class="cal-bar">
+            {% set b = namespace(cal=0) %}{% for i in plan.breakfast %}{% set b.cal = b.cal + i.cal %}{% endfor %}
+            {% set l = namespace(cal=0) %}{% for i in plan.lunch %}{% set l.cal = l.cal + i.cal %}{% endfor %}
+            {% set d = namespace(cal=0) %}{% for i in plan.dinner %}{% set d.cal = d.cal + i.cal %}{% endfor %}
+            {% set s = namespace(cal=0) %}{% for i in plan.snacks %}{% set s.cal = s.cal + i.cal %}{% endfor %}
+            <div class="bar-seg breakfast" style="width: {{ ((b.cal / plan.total_calories) * 100)|int }}%">B {{ ((b.cal / plan.total_calories)*100)|int }}%</div>
+            <div class="bar-seg lunch" style="width: {{ ((l.cal / plan.total_calories) * 100)|int }}%">L {{ ((l.cal / plan.total_calories)*100)|int }}%</div>
+            <div class="bar-seg dinner" style="width: {{ ((d.cal / plan.total_calories) * 100)|int }}%">D {{ ((d.cal / plan.total_calories)*100)|int }}%</div>
+            <div class="bar-seg snacks" style="width: {{ ((s.cal / plan.total_calories) * 100)|int }}%">S {{ ((s.cal / plan.total_calories)*100)|int }}%</div>
+        </div>
+    </div>
+    <div class="bar-legend">
+        <span class="legend-item breakfast-dot">Breakfast</span>
+        <span class="legend-item lunch-dot">Lunch</span>
+        <span class="legend-item dinner-dot">Dinner</span>
+        <span class="legend-item snacks-dot">Snacks</span>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
